@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(pageTitle)">
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title th:text="${pageTitle} + ' · HelpDesk'">HelpDesk</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+    <link rel="stylesheet" th:href="@{/css/helpdesk-theme.css}"/>
+</head>
+<body>
+
+<aside class="sidebar" th:fragment="sidebar(activeNav)"
+       xmlns:sec="http://www.thymeleaf.org/extras/springsecurity">
+    <div class="sidebar-brand">
+        <div class="mark"><i class="bi bi-ticket-perforated"></i></div>
+        <span class="name">HelpDesk</span>
+        <span class="version">v1.0</span>
+    </div>
+
+    <nav class="sidebar-nav">
+        <div class="nav-group">
+            <p class="nav-group-label">General</p>
+            <a th:href="@{/home}" class="nav-item" th:classappend="${activeNav == 'home'} ? 'active'">Home</a>
+            <a th:href="@{/dashboard}" class="nav-item" th:classappend="${activeNav == 'dashboard'} ? 'active'">Dashboard</a>
+        </div>
+
+        <div class="nav-group">
+            <p class="nav-group-label">Support</p>
+            <a th:href="@{/tickets}" class="nav-item" th:classappend="${activeNav == 'tickets'} ? 'active'">Tickets</a>
+        </div>
+
+        <div class="nav-group" sec:authorize="hasRole('ADMIN')">
+            <p class="nav-group-label">Admin</p>
+            <a th:href="@{/admin/users}" class="nav-item" th:classappend="${activeNav == 'admin'} ? 'active'">Users</a>
+        </div>
+    </nav>
+
+    <div class="sidebar-user">
+        <div class="name-row">
+            <p class="name" sec:authentication="name">username</p>
+            <p class="role" sec:authentication="principal.authorities">ROLE</p>
+        </div>
+        <form th:action="@{/logout}" method="post">
+            <button type="submit" class="sidebar-signout">Sign out</button>
+        </form>
+    </div>
+</aside>
+
+<div class="topbar" th:fragment="topbar(pageTitleText, pageSub)">
+    <div class="titles">
+        <p class="title" th:text="${pageTitleText}">Title</p>
+        <p class="sub" th:text="${pageSub}" th:if="${pageSub != null}">subtitle</p>
+    </div>
+</div>
+
+</body>
+</html>

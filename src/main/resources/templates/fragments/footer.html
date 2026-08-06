@@ -1,0 +1,10 @@
+<footer th:fragment="footerFragment" xmlns:th="http://www.thymeleaf.org">
+    <div class="footer">
+        <div class="container">
+            <span class="text-muted">
+                &copy; <span th:text="${#temporals.year(#temporals.createNow())}"></span>
+                HelpDesk — Internal IT Support.
+            </span>
+        </div>
+    </div>
+</footer>

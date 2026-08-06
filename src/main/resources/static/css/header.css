@@ -1,0 +1,41 @@
+header .outer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 24px;
+    background: var(--bg-elevated, #0d1117);
+}
+
+header .items {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+header .header-logo {
+    color: var(--accent, #2563eb);
+    font-size: 20px;
+}
+
+header .title {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+header .login-name {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text-secondary, #8b949e);
+    font-size: 12px;
+}
+
+header .log-out {
+    color: var(--red, #f87171);
+}
+
+header .line {
+    height: 1px;
+    background: var(--border, rgba(255,255,255,0.07));
+}

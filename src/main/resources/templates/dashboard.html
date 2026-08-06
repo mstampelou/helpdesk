@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: head('Dashboard')}"></head>
+<body>
+<div class="app-shell">
+    <aside th:replace="~{layout/base :: sidebar('dashboard')}"></aside>
+
+    <main class="main">
+        <div th:replace="~{layout/base :: topbar('Dashboard', 'Live overview of support activity')}"></div>
+
+        <div class="content">
+            <div class="stat-grid mb-16">
+                <div class="card">
+                    <p class="stat-value" style="color:#60a5fa" th:text="${openCount}">0</p>
+                    <p class="stat-label">Open</p>
+                    <div class="bar-track">
+                        <div class="bar-fill bar-blue"
+                             th:style="'width:' + (${totalTickets} > 0 ? (${openCount} * 100 / ${totalTickets}) : 0) + '%'"></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <p class="stat-value" style="color:#fbbf24" th:text="${inProgressCount}">0</p>
+                    <p class="stat-label">In Progress</p>
+                    <div class="bar-track">
+                        <div class="bar-fill bar-amber"
+                             th:style="'width:' + (${totalTickets} > 0 ? (${inProgressCount} * 100 / ${totalTickets}) : 0) + '%'"></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <p class="stat-value" style="color:#34d399" th:text="${resolvedCount}">0</p>
+                    <p class="stat-label">Resolved</p>
+                    <div class="bar-track">
+                        <div class="bar-fill bar-emerald"
+                             th:style="'width:' + (${totalTickets} > 0 ? (${resolvedCount} * 100 / ${totalTickets}) : 0) + '%'"></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <p class="stat-value" style="color:#71717a" th:text="${closedCount}">0</p>
+                    <p class="stat-label">Closed</p>
+                    <div class="bar-track">
+                        <div class="bar-fill bar-zinc"
+                             th:style="'width:' + (${totalTickets} > 0 ? (${closedCount} * 100 / ${totalTickets}) : 0) + '%'"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-2 mb-16">
+                <div class="card">
+                    <p class="card-label">By Priority</p>
+                    <div style="margin-bottom:12px;">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                            <span style="font-size:12px;color:var(--text-secondary)">Critical</span>
+                            <span class="cell-faint" th:text="${criticalCount} + ' / ' + ${totalTickets}"></span>
+                        </div>
+                        <div class="bar-track thick"><div class="bar-fill bar-red" th:style="'width:' + (${totalTickets} > 0 ? (${criticalCount} * 100 / ${totalTickets}) : 0) + '%'"></div></div>
+                    </div>
+                    <div style="margin-bottom:12px;">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                            <span style="font-size:12px;color:var(--text-secondary)">High</span>
+                            <span class="cell-faint" th:text="${highCount} + ' / ' + ${totalTickets}"></span>
+                        </div>
+                        <div class="bar-track thick"><div class="bar-fill bar-orange" th:style="'width:' + (${totalTickets} > 0 ? (${highCount} * 100 / ${totalTickets}) : 0) + '%'"></div></div>
+                    </div>
+                    <div style="margin-bottom:12px;">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                            <span style="font-size:12px;color:var(--text-secondary)">Medium</span>
+                            <span class="cell-faint" th:text="${mediumCount} + ' / ' + ${totalTickets}"></span>
+                        </div>
+                        <div class="bar-track thick"><div class="bar-fill bar-yellow" th:style="'width:' + (${totalTickets} > 0 ? (${mediumCount} * 100 / ${totalTickets}) : 0) + '%'"></div></div>
+                    </div>
+                    <div>
+                        <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                            <span style="font-size:12px;color:var(--text-secondary)">Low</span>
+                            <span class="cell-faint" th:text="${lowCount} + ' / ' + ${totalTickets}"></span>
+                        </div>
+                        <div class="bar-track thick"><div class="bar-fill bar-zinc" th:style="'width:' + (${totalTickets} > 0 ? (${lowCount} * 100 / ${totalTickets}) : 0) + '%'"></div></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <p class="card-label">Agent Workload (open + in-progress)</p>
+                    <div th:each="agent : ${agentWorkload}" style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+                        <div class="avatar" th:text="${agent.initials}">XX</div>
+                        <div style="flex:1;">
+                            <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                                <span style="font-size:12px;color:var(--text-secondary)" th:text="${agent.fullName}">Name</span>
+                                <span class="cell-faint" th:text="${agent.activeCount} + ' active'"></span>
+                            </div>
+                            <div class="bar-track thick">
+                                <div class="bar-fill bar-blue" th:style="'width:' + (${agent.activeCount} * 20) + '%'"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <p th:if="${#lists.isEmpty(agentWorkload)}" class="cell-faint">No agents assigned yet.</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <p class="card-label">Recently Updated</p>
+                <table class="data-table">
+                    <tbody>
+                    <tr th:each="ticket : ${recentTickets}"
+                        th:onclick="'window.location=\'' + @{/tickets/{uuid}(uuid=${ticket.uuid})} + '\''">
+                        <td class="cell-title" th:text="${ticket.title}">Title</td>
+                        <td style="width:110px;">
+                            <span class="badge" th:classappend="'badge-status-' + ${ticket.status.name().toLowerCase()}"
+                                  th:text="${ticket.status}">STATUS</span>
+                        </td>
+                        <td style="width:110px;">
+                            <span class="badge" th:classappend="'badge-priority-' + ${ticket.priority.name().toLowerCase()}"
+                                  th:text="${ticket.priority}">PRIORITY</span>
+                        </td>
+                        <td class="cell-faint" style="width:140px;text-align:right;"
+                            th:text="${#temporals.format(ticket.updatedAt, 'yyyy-MM-dd HH:mm')}">updated</td>
+                    </tr>
+                    </tbody>
+                </table>
+                <p th:if="${#lists.isEmpty(recentTickets)}" class="empty-row">No recent activity.</p>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

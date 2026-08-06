@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: head(ticket.title)}"></head>
+<body>
+<div class="app-shell">
+    <aside th:replace="~{layout/base :: sidebar('tickets')}"></aside>
+
+    <main class="main">
+        <div class="topbar">
+            <div class="titles">
+                <p class="title" th:text="${ticket.title}">Title</p>
+                <p class="sub" th:text="${ticket.uuid}">uuid</p>
+            </div>
+            <div class="actions" xmlns:sec="http://www.thymeleaf.org/extras/springsecurity">
+                <a th:href="@{/tickets}" class="btn btn-subtle">‹ Back</a>
+                <a th:href="@{/tickets/{uuid}/edit(uuid=${ticket.uuid})}" class="btn btn-ghost">Edit</a>
+                <form th:action="@{/tickets/{uuid}/delete(uuid=${ticket.uuid})}" method="post" style="display:inline"
+                      sec:authorize="hasAnyRole('ADMIN','SUPPORT')"
+                      onsubmit="return confirm('Delete this ticket? This cannot be undone from the UI.');">
+                    <button type="submit" class="btn btn-subtle" style="color:var(--red);">Delete</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="detail-layout">
+            <div class="detail-main">
+                <div class="description-block">
+                    <p class="card-label">Description</p>
+                    <pre th:text="${ticket.description}">Description</pre>
+                </div>
+
+                <p class="card-label" style="margin-bottom:12px;">Activity (<span th:text="${#lists.size(ticket.comments)}">0</span>)</p>
+
+                <div style="margin-bottom:20px;">
+                    <p th:if="${#lists.isEmpty(ticket.comments)}" class="cell-faint" style="text-align:center;padding:24px 0;">No activity on this ticket yet.</p>
+
+                    <div class="comment" th:each="comment : ${ticket.comments}">
+                        <div class="avatar" th:text="${comment.authorInitials}">XX</div>
+                        <div class="comment-body">
+                            <div class="comment-head">
+                                <span class="comment-author" th:text="${comment.authorFullName}">Author</span>
+                                <span class="badge" th:classappend="'badge-role-' + ${comment.authorRole.name().toLowerCase()}" th:text="${comment.authorRole}">ROLE</span>
+                                <span class="comment-time" th:text="${#temporals.format(comment.createdAt, 'yyyy-MM-dd HH:mm')}">time</span>
+                                <span th:if="${comment.internalNote}" class="badge badge-role-admin">internal</span>
+                            </div>
+                            <p class="comment-text" th:classappend="${comment.internalNote} ? 'comment-internal'" th:text="${comment.body}">Comment text</p>
+                        </div>
+                    </div>
+                </div>
+
+                <form th:action="@{/tickets/{uuid}/comments(uuid=${ticket.uuid})}" method="post">
+                    <div class="comment">
+                        <div class="avatar me">Me</div>
+                        <div class="comment-body">
+                            <textarea class="textarea" name="body" rows="3" placeholder="Add a comment…" required></textarea>
+                            <div style="margin-top:8px; display:flex; align-items:center; gap:12px;"
+                                 xmlns:sec="http://www.thymeleaf.org/extras/springsecurity">
+                                <button type="submit" class="btn btn-primary btn-xs">Submit Comment</button>
+                                <label style="font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:6px;" sec:authorize="hasAnyRole('ADMIN','SUPPORT')">
+                                    <input type="checkbox" name="internalNote" value="true"/> Internal note (not visible to requester)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="detail-meta">
+                <div class="meta-block">
+                    <p class="meta-label">Status</p>
+                    <span class="badge" th:classappend="'badge-status-' + ${ticket.status.name().toLowerCase()}" th:text="${ticket.status}">STATUS</span>
+                </div>
+                <div class="meta-block">
+                    <p class="meta-label">Priority</p>
+                    <span class="badge" th:classappend="'badge-priority-' + ${ticket.priority.name().toLowerCase()}" th:text="${ticket.priority}">PRIORITY</span>
+                </div>
+                <div class="meta-block">
+                    <p class="meta-label">Category</p>
+                    <p class="meta-value" th:text="${ticket.categoryName != null ? ticket.categoryName : '—'}">Category</p>
+                </div>
+                <div class="meta-block">
+                    <p class="meta-label">Assigned</p>
+                    <p class="meta-value" th:text="${ticket.assignedToName != null ? ticket.assignedToName : 'Unassigned'}">Assignee</p>
+                    <form th:action="@{/tickets/{uuid}/assign(uuid=${ticket.uuid})}" method="post" style="margin-top:6px;"
+                          xmlns:sec="http://www.thymeleaf.org/extras/springsecurity" sec:authorize="hasAnyRole('ADMIN','SUPPORT')">
+                        <select name="agentUuid" class="select" style="width:100%;font-size:11px;" onchange="if(this.value) this.form.submit()">
+                            <option value="">— reassign —</option>
+                            <option th:each="agent : ${agentsReadOnlyDTO}" th:value="${agent.uuid}" th:text="${agent.fullName}"></option>
+                        </select>
+                    </form>
+                </div>
+                <div class="meta-block">
+                    <p class="meta-label">Created</p>
+                    <p class="meta-mono" th:text="${#temporals.format(ticket.createdAt, 'yyyy-MM-dd HH:mm')}">created</p>
+                </div>
+                <div class="meta-block">
+                    <p class="meta-label">Updated</p>
+                    <p class="meta-mono" th:text="${#temporals.format(ticket.updatedAt, 'yyyy-MM-dd HH:mm')}">updated</p>
+                </div>
+                <div class="meta-block" th:if="${!#lists.isEmpty(ticket.tags)}">
+                    <p class="meta-label">Tags</p>
+                    <span class="tag-chip" th:each="tag : ${ticket.tags}" th:text="${tag}">tag</span>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

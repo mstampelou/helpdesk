@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: head('User Management')}"></head>
+<body>
+<div class="app-shell">
+    <aside th:replace="~{layout/base :: sidebar('admin')}"></aside>
+
+    <main class="main">
+        <div class="topbar">
+            <div class="titles">
+                <p class="title">User Management</p>
+                <p class="sub" th:text="${activeCount} + ' active · ' + ${users.size()} + ' total'">0 active</p>
+            </div>
+        </div>
+
+        <form class="filter-bar" method="get" th:action="@{/admin/users}">
+            <div class="search-wrap">
+                <span class="icon">⌕</span>
+                <input class="input" type="text" name="search" placeholder="Search users…" th:value="${search}"/>
+            </div>
+            <button type="submit" class="btn btn-ghost btn-xs">Search</button>
+        </form>
+
+        <div class="content" style="padding:0; display:flex; flex-direction:column; flex:1; overflow:hidden;">
+            <div style="flex:1; overflow:auto;">
+                <table class="data-table">
+                    <thead>
+                    <tr>
+                        <th style="padding-left:24px;">Username</th>
+                        <th>Email</th>
+                        <th style="width:110px;">Role</th>
+                        <th style="width:80px;">Tickets</th>
+                        <th style="width:110px;">Status</th>
+                        <th style="width:120px;">Joined</th>
+                        <th style="width:100px;padding-right:24px;">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="u : ${users}">
+                        <td style="padding-left:24px;">
+                            <div style="display:flex;align-items:center;gap:8px;">
+                                <div class="avatar" th:text="${#strings.substring(u.username,0,1).toUpperCase()}">X</div>
+                                <span class="cell-title" th:text="${u.username}">username</span>
+                            </div>
+                        </td>
+                        <td class="cell-faint" th:text="${u.email}">email</td>
+                        <td>
+                            <form th:action="@{/admin/users/{uuid}/role(uuid=${u.uuid})}" method="post">
+                                <select class="select" name="role" onchange="this.form.submit()" style="background:transparent;border:none;padding:2px;">
+                                    <option value="ADMIN"   th:selected="${u.role.name() == 'ADMIN'}">admin</option>
+                                    <option value="SUPPORT" th:selected="${u.role.name() == 'SUPPORT'}">support</option>
+                                    <option value="USER"    th:selected="${u.role.name() == 'USER'}">user</option>
+                                </select>
+                            </form>
+                        </td>
+                        <td class="cell-faint" th:text="${u.ticketCount}">0</td>
+                        <td>
+                            <span class="badge" th:classappend="${u.active} ? 'badge-active' : 'badge-inactive'">
+                                <span class="dot" th:classappend="${u.active} ? 'dot-emerald' : 'dot-zinc'"></span>
+                                <span th:text="${u.active} ? 'Active' : 'Inactive'"></span>
+                            </span>
+                        </td>
+                        <td class="cell-faint" th:text="${#temporals.format(u.createdAt, 'yyyy-MM-dd')}">joined</td>
+                        <td style="padding-right:24px;">
+                            <form th:action="@{/admin/users/{uuid}/toggle-active(uuid=${u.uuid})}" method="post">
+                                <button type="submit" class="btn btn-subtle btn-xs" th:text="${u.active} ? 'Disable' : 'Enable'">Toggle</button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <p class="empty-row" th:if="${users.isEmpty()}">No users match your search.</p>
+            </div>
+
+            <div class="summary-bar">
+                <span style="display:flex;align-items:center;gap:6px;" class="cell-faint">
+                    <span class="badge badge-role-admin">admin</span> <span th:text="${adminCount}">0</span>
+                </span>
+                <span style="display:flex;align-items:center;gap:6px;" class="cell-faint">
+                    <span class="badge badge-role-support">support</span> <span th:text="${supportCount}">0</span>
+                </span>
+                <span style="display:flex;align-items:center;gap:6px;" class="cell-faint">
+                    <span class="badge badge-role-user">user</span> <span th:text="${userCount}">0</span>
+                </span>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: head('Tickets')}"></head>
+<body>
+<div class="app-shell">
+    <aside th:replace="~{layout/base :: sidebar('tickets')}"></aside>
+
+    <main class="main">
+        <div class="topbar">
+            <div class="titles">
+                <p class="title">Tickets</p>
+                <p class="sub" th:text="${tickets.totalElements} + ' total · ' + ${activeCount} + ' active'">0 total</p>
+            </div>
+            <div class="actions">
+                <a th:href="@{/tickets/insert}" class="btn btn-primary">+ New Ticket</a>
+            </div>
+        </div>
+
+        <form class="filter-bar" method="get" th:action="@{/tickets}">
+            <div class="search-wrap">
+                <span class="icon">⌕</span>
+                <input class="input" type="text" name="search" placeholder="Search by title…" th:value="${search}"/>
+            </div>
+            <select class="select" name="status" onchange="this.form.submit()">
+                <option value="" th:selected="${statusFilter == null}">All statuses</option>
+                <option value="OPEN" th:selected="${statusFilter == 'OPEN'}">Open</option>
+                <option value="IN_PROGRESS" th:selected="${statusFilter == 'IN_PROGRESS'}">In Progress</option>
+                <option value="RESOLVED" th:selected="${statusFilter == 'RESOLVED'}">Resolved</option>
+                <option value="CLOSED" th:selected="${statusFilter == 'CLOSED'}">Closed</option>
+            </select>
+            <select class="select" name="priority" onchange="this.form.submit()">
+                <option value="" th:selected="${priorityFilter == null}">All priorities</option>
+                <option value="CRITICAL" th:selected="${priorityFilter == 'CRITICAL'}">Critical</option>
+                <option value="HIGH" th:selected="${priorityFilter == 'HIGH'}">High</option>
+                <option value="MEDIUM" th:selected="${priorityFilter == 'MEDIUM'}">Medium</option>
+                <option value="LOW" th:selected="${priorityFilter == 'LOW'}">Low</option>
+            </select>
+            <button type="submit" class="btn btn-ghost btn-xs">Apply</button>
+        </form>
+
+        <div class="content" style="padding:0; display:flex; flex-direction:column; flex:1; overflow:hidden;">
+            <div style="flex:1; overflow:auto;">
+                <table class="data-table">
+                    <thead>
+                    <tr>
+                        <th style="padding-left:24px;">Title</th>
+                        <th style="width:110px;">Status</th>
+                        <th style="width:110px;">Priority</th>
+                        <th style="width:120px;">Assigned To</th>
+                        <th style="width:140px;padding-right:24px;">Updated</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="ticket : ${tickets.content}"
+                        th:onclick="'window.location=\'' + @{/tickets/{uuid}(uuid=${ticket.uuid})} + '\''">
+                        <td style="padding-left:24px;">
+                            <p class="cell-title" th:text="${ticket.title}">Title</p>
+                            <span class="cell-tags" th:each="tag : ${ticket.tags}" th:text="${tag} + ' '"></span>
+                        </td>
+                        <td><span class="badge" th:classappend="'badge-status-' + ${ticket.status.name().toLowerCase()}" th:text="${ticket.status}">STATUS</span></td>
+                        <td><span class="badge" th:classappend="'badge-priority-' + ${ticket.priority.name().toLowerCase()}" th:text="${ticket.priority}">PRIORITY</span></td>
+                        <td style="color:var(--text-secondary)" th:text="${ticket.assignedToName != null ? ticket.assignedToName : '—'}">Assignee</td>
+                        <td class="cell-faint" style="padding-right:24px;" th:text="${#temporals.format(ticket.updatedAt, 'yyyy-MM-dd HH:mm')}">updated</td>
+                    </tr>
+                    </tbody>
+                </table>
+                <p class="empty-row" th:if="${tickets.content.isEmpty()}">No tickets match your filters.</p>
+            </div>
+
+            <div class="pagination-bar">
+                <span class="pagination-info"
+                      th:text="${tickets.totalElements == 0 ? '0 results' :
+                                 (tickets.number * tickets.size + 1) + '–' +
+                                 (T(java.lang.Math).min(((tickets.number + 1) * tickets.size) * 1L, tickets.totalElements)) +
+                                 ' of ' + tickets.totalElements}">results</span>
+
+                <div class="pagination-pages">
+                    <a th:href="@{/tickets(search=${search},status=${statusFilter},priority=${priorityFilter},page=${tickets.number - 1})}"
+                       class="page-btn" th:classappend="${!tickets.hasPrevious()} ? 'disabled'">‹</a>
+
+                    <a th:each="p : ${#numbers.sequence(0, tickets.totalPages - 1)}"
+                       th:href="@{/tickets(search=${search},status=${statusFilter},priority=${priorityFilter},page=${p})}"
+                       class="page-btn" th:classappend="${p == tickets.number} ? 'active'"
+                       th:text="${p + 1}">1</a>
+
+                    <a th:href="@{/tickets(search=${search},status=${statusFilter},priority=${priorityFilter},page=${tickets.number + 1})}"
+                       class="page-btn" th:classappend="${!tickets.hasNext()} ? 'disabled'">›</a>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

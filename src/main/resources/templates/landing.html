@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: head('Welcome')}"></head>
+<body>
+<div class="login-screen">
+    <div class="login-box" style="text-align:center;">
+        <div class="login-logo">
+            <div class="mark"><i class="bi bi-ticket-perforated"></i></div>
+            <h1>HelpDesk</h1>
+            <p>Internal IT support ticketing</p>
+        </div>
+
+        <p style="color:var(--text-muted); font-size:12px; line-height:1.6; max-width:300px; margin:0 auto 28px;">
+            Track, assign, and resolve IT issues fast. Sign in with your company
+            account to open a new ticket or check the status of an existing one.
+        </p>
+
+        <a th:href="@{/login}" class="login-submit" style="display:inline-flex; align-items:center; justify-content:center; gap:8px; text-decoration:none; max-width:200px; margin:0 auto;">
+            Sign in <i class="bi bi-arrow-right"></i>
+        </a>
+
+        <p class="login-footer">Account issues? it-admin@corp.internal</p>
+    </div>
+</div>
+</body>
+</html>

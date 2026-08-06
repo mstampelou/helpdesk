@@ -1,0 +1,11 @@
+footer .footer {
+    background: var(--bg-elevated, #0d1117);
+    border-top: 1px solid var(--border, rgba(255,255,255,0.07));
+    padding: 14px 24px;
+    text-align: center;
+}
+
+footer .text-muted {
+    color: var(--text-faint, #484f58);
+    font-size: 11px;
+}
