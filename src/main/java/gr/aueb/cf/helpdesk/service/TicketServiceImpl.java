@@ -68,11 +68,18 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<TicketReadOnlyDTO> findPaginated(String search, TicketStatus status, TicketPriority priority, Pageable pageable) {
+    public Page<TicketReadOnlyDTO> findPaginated(String search, TicketStatus status, TicketPriority priority, Pageable pageable, String currentUsername) {
+        User currentUser = userRepository.findByUsername(currentUsername)
+                .orElseThrow(() -> new UserNotFoundException(currentUsername));
+
         Specification<Ticket> spec = Specification.where(TicketSpecifications.notDeleted())
                 .and(TicketSpecifications.hasStatus(status))
                 .and(TicketSpecifications.hasPriority(priority))
                 .and(TicketSpecifications.titleContains(search));
+
+        if (currentUser.getRole() == Role.USER) {
+            spec = spec.and(TicketSpecifications.createdBy(currentUser));
+        }
 
         return ticketRepository.findAll(spec, pageable).map(this::toReadOnlyDTO);
     }

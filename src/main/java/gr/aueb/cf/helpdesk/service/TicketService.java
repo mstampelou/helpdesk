@@ -11,7 +11,8 @@ import org.springframework.data.domain.Pageable;
 
 public interface TicketService {
     TicketReadOnlyDTO insertTicket(TicketInsertDTO dto, String currentUsername);
-    Page<TicketReadOnlyDTO> findPaginated(String search, TicketStatus status, TicketPriority priority, Pageable pageable);
+    Page<TicketReadOnlyDTO> findPaginated(String search, TicketStatus status, TicketPriority priority,
+                                          Pageable pageable, String currentUsername);
     TicketDetailDTO findByUuid(String uuid);
     void addComment(String ticketUuid, String body, boolean internalNote, String currentUsername);
 

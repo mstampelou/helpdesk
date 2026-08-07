@@ -22,7 +22,8 @@
         <div class="nav-group">
             <p class="nav-group-label">General</p>
             <a th:href="@{/home}" class="nav-item" th:classappend="${activeNav == 'home'} ? 'active'">Home</a>
-            <a th:href="@{/dashboard}" class="nav-item" th:classappend="${activeNav == 'dashboard'} ? 'active'">Dashboard</a>
+            <a th:href="@{/dashboard}" class="nav-item" th:classappend="${activeNav == 'dashboard'} ? 'active'"
+               sec:authorize="hasAnyRole('ADMIN','SUPPORT')">Dashboard</a>
         </div>
 
         <div class="nav-group">

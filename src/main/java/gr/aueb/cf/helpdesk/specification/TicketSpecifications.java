@@ -4,6 +4,7 @@ import gr.aueb.cf.helpdesk.model.Ticket;
 import gr.aueb.cf.helpdesk.model.enums.TicketPriority;
 import gr.aueb.cf.helpdesk.model.enums.TicketStatus;
 import org.springframework.data.jpa.domain.Specification;
+import gr.aueb.cf.helpdesk.model.User;
 
 public class TicketSpecifications {
 
@@ -26,5 +27,9 @@ public class TicketSpecifications {
             if (search == null || search.isBlank()) return null;
             return cb.like(cb.lower(root.get("title")), "%" + search.toLowerCase() + "%");
         };
+    }
+
+    public static Specification<Ticket> createdBy(User user) {
+        return (root, query, cb) -> user == null ? null : cb.equal(root.get("createdBy"), user);
     }
 }

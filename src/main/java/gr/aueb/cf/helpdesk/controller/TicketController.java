@@ -44,6 +44,7 @@ public class TicketController {
                         @RequestParam(required = false) TicketStatus status,
                         @RequestParam(required = false) TicketPriority priority,
                         @PageableDefault(size = 10) Pageable pageable,
+                        Authentication authentication,
                         Model model) {
 
         if (pageable.getSort().isUnsorted()) {
@@ -51,7 +52,7 @@ public class TicketController {
                     Sort.by(Sort.Direction.DESC, "updatedAt"));
         }
 
-        Page<TicketReadOnlyDTO> tickets = ticketService.findPaginated(search, status, priority, pageable);
+        Page<TicketReadOnlyDTO> tickets = ticketService.findPaginated(search, status, priority, pageable, authentication.getName());
 
         model.addAttribute("tickets", tickets);
         model.addAttribute("search", search);
