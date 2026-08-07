@@ -16,11 +16,9 @@ public interface TicketService {
     TicketDetailDTO findByUuid(String uuid);
     void addComment(String ticketUuid, String body, boolean internalNote, String currentUsername);
 
-    // Week 2 — core CRUD closeout
     TicketUpdateDTO getForEdit(String uuid);
     void updateTicket(String uuid, TicketUpdateDTO dto, String currentUsername);
     void deleteTicket(String uuid);
 
-    // Week 3 — assignment, restricted to staff via @PreAuthorize
-    void assignTicket(String uuid, String agentUuid);
+    void assignTicket(String uuid, String agentUuid, String reason, String currentUsername);
 }

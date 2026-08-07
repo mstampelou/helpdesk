@@ -23,4 +23,12 @@ public class GlobalExceptionHandler {
         mav.setStatus(HttpStatus.FORBIDDEN);
         return mav;
     }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ModelAndView handleBadRequest(IllegalArgumentException ex) {
+        ModelAndView mav = new ModelAndView("error/400");
+        mav.addObject("message", ex.getMessage());
+        mav.setStatus(HttpStatus.BAD_REQUEST);
+        return mav;
+    }
 }

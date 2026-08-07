@@ -81,8 +81,11 @@ public class TicketController {
     }
 
     @PostMapping("/{uuid}/assign")
-    public String assign(@PathVariable String uuid, @RequestParam String agentUuid) {
-        ticketService.assignTicket(uuid, agentUuid);
+    public String assign(@PathVariable String uuid,
+                         @RequestParam String agentUuid,
+                         @RequestParam(required = false) String reason,
+                         Authentication authentication) {
+        ticketService.assignTicket(uuid, agentUuid, reason, authentication.getName());
         return "redirect:/tickets/" + uuid;
     }
 

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: head('Bad request')}"></head>
+<body>
+<div class="login-screen">
+    <div class="login-box" style="text-align:center;">
+        <div class="login-logo">
+            <div class="mark"><i class="bi bi-exclamation-triangle"></i></div>
+            <h1>400 — Bad request</h1>
+            <p th:text="${message}">Something about the request was invalid.</p>
+        </div>
+        <a th:href="@{/tickets}" class="login-submit" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;max-width:200px;margin:0 auto;">Back to tickets</a>
+    </div>
+</div>
+</body>
+</html>

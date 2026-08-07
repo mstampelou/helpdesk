@@ -198,14 +198,42 @@ public class TicketServiceImpl implements TicketService {
         ticket.setDeleted(true); // soft delete — never a real DB delete
     }
 
+//    @PreAuthorize("hasAnyRole('ADMIN','SUPPORT')")
+//    @Override
+//    @Transactional
+//    public void assignTicket(String uuid, String agentUuid) {
+//        Ticket ticket = getTicketOrThrow(uuid);
+//        User agent = userRepository.findByUuid(agentUuid)
+//                .orElseThrow(() -> new UserNotFoundException(agentUuid));
+//        ticket.setAssignedTo(agent);
+//    }
+
     @PreAuthorize("hasAnyRole('ADMIN','SUPPORT')")
     @Override
     @Transactional
-    public void assignTicket(String uuid, String agentUuid) {
+    public void assignTicket(String uuid, String agentUuid, String reason, String currentUsername) {
         Ticket ticket = getTicketOrThrow(uuid);
+        boolean wasAlreadyAssigned = ticket.getAssignedTo() != null;
+
+        if (wasAlreadyAssigned && (reason == null || reason.isBlank())) {
+            throw new IllegalArgumentException("A reason is required when reassigning a ticket.");
+        }
+
         User agent = userRepository.findByUuid(agentUuid)
                 .orElseThrow(() -> new UserNotFoundException(agentUuid));
+        User actor = userRepository.findByUsername(currentUsername)
+                .orElseThrow(() -> new UserNotFoundException(currentUsername));
+
         ticket.setAssignedTo(agent);
+
+        Comment note = new Comment();
+        note.setTicket(ticket);
+        note.setAuthor(actor);
+        note.setInternalNote(true);
+        note.setBody(wasAlreadyAssigned
+                ? "Reassigned to " + agent.getFullName() + ": " + reason.trim()
+                : "Assigned to " + agent.getFullName() + (reason != null && !reason.isBlank() ? ": " + reason.trim() : ""));
+        commentRepository.save(note);
     }
 
     private Ticket getTicketOrThrow(String uuid) {

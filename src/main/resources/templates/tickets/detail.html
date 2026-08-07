@@ -83,10 +83,15 @@
                     <p class="meta-value" th:text="${ticket.assignedToName != null ? ticket.assignedToName : 'Unassigned'}">Assignee</p>
                     <form th:action="@{/tickets/{uuid}/assign(uuid=${ticket.uuid})}" method="post" style="margin-top:6px;"
                           xmlns:sec="http://www.thymeleaf.org/extras/springsecurity" sec:authorize="hasAnyRole('ADMIN','SUPPORT')">
-                        <select name="agentUuid" class="select" style="width:100%;font-size:11px;" onchange="if(this.value) this.form.submit()">
-                            <option value="">— reassign —</option>
+                        <select name="agentUuid" class="select" style="width:100%;font-size:11px;margin-bottom:6px;" required>
+                            <option value="">— select agent —</option>
                             <option th:each="agent : ${agentsReadOnlyDTO}" th:value="${agent.uuid}" th:text="${agent.fullName}"></option>
                         </select>
+                        <input type="text" name="reason" class="input" style="width:100%;font-size:11px;margin-bottom:6px;"
+                               placeholder="Reason for reassignment…" required maxlength="500"
+                               th:if="${ticket.assignedToName != null}"/>
+                        <button type="submit" class="btn btn-ghost btn-xs" style="width:100%;"
+                                th:text="${ticket.assignedToName != null} ? 'Reassign' : 'Assign'">Reassign</button>
                     </form>
                 </div>
                 <div class="meta-block">
