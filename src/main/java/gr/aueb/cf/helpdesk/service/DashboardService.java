@@ -10,4 +10,6 @@ public interface DashboardService {
     Map<String, Object> getStats();
     List<AgentWorkloadDTO> getAgentWorkload();
     List<TicketReadOnlyDTO> getRecentTickets();
+    List<TicketReadOnlyDTO> getOrphanedTickets();
+    List<TicketReadOnlyDTO> getUnassignedTickets();
 }

@@ -117,6 +117,44 @@
                 </table>
                 <p th:if="${#lists.isEmpty(recentTickets)}" class="empty-row">No recent activity.</p>
             </div>
+
+            <div class="card" style="margin-top:16px;" th:if="${!#lists.isEmpty(orphanedTickets)}">
+                <p class="card-label" style="color:#f87171;">⚠️ Orphaned Tickets</p>
+                <table class="data-table">
+                    <tbody>
+                    <tr th:each="ticket : ${orphanedTickets}"
+                        th:onclick="'window.location=\'' + @{/tickets/{uuid}(uuid=${ticket.uuid})} + '\''">
+                        <td class="cell-title" th:text="${ticket.title}">Title</td>
+                        <td style="width:110px;">
+                            <span class="badge" th:classappend="'badge-status-' + ${ticket.status.name().toLowerCase()}" th:text="${ticket.status}">STATUS</span>
+                        </td>
+                        <td style="width:110px;">
+                            <span class="badge" th:classappend="'badge-priority-' + ${ticket.priority.name().toLowerCase()}" th:text="${ticket.priority}">PRIORITY</span>
+                        </td>
+                        <td class="cell-faint" style="width:160px;" th:text="${ticket.assignedToName}">assignee</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card" style="margin-top:16px;" th:if="${!#lists.isEmpty(unassignedTickets)}">
+                <p class="card-label" style="color:#fbbf24;">📋 Unassigned Tickets</p>
+                <table class="data-table">
+                    <tbody>
+                    <tr th:each="ticket : ${unassignedTickets}"
+                        th:onclick="'window.location=\'' + @{/tickets/{uuid}(uuid=${ticket.uuid})} + '\''">
+                        <td class="cell-title" th:text="${ticket.title}">Title</td>
+                        <td style="width:110px;">
+                            <span class="badge" th:classappend="'badge-status-' + ${ticket.status.name().toLowerCase()}" th:text="${ticket.status}">STATUS</span>
+                        </td>
+                        <td style="width:110px;">
+                            <span class="badge" th:classappend="'badge-priority-' + ${ticket.priority.name().toLowerCase()}" th:text="${ticket.priority}">PRIORITY</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
         </div>
     </main>
 </div>

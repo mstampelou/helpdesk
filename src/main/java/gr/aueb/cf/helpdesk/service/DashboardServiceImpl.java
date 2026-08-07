@@ -73,6 +73,26 @@ public class DashboardServiceImpl implements DashboardService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<TicketReadOnlyDTO> getOrphanedTickets() {
+        List<TicketStatus> activeStatuses = List.of(TicketStatus.OPEN, TicketStatus.IN_PROGRESS);
+        return ticketRepository.findByDeletedFalseAndStatusInAndAssignedTo_RoleNot(activeStatuses, Role.SUPPORT)
+                .stream()
+                .map(this::toReadOnlyDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<TicketReadOnlyDTO> getUnassignedTickets() {
+        List<TicketStatus> activeStatuses = List.of(TicketStatus.OPEN, TicketStatus.IN_PROGRESS);
+        return ticketRepository.findByDeletedFalseAndStatusInAndAssignedToIsNull(activeStatuses)
+                .stream()
+                .map(this::toReadOnlyDTO)
+                .collect(Collectors.toList());
+    }
+
     private TicketReadOnlyDTO toReadOnlyDTO(Ticket t) {
         return new TicketReadOnlyDTO(
                 t.getUuid(),

@@ -17,6 +17,8 @@ public class DashboardController {
         model.addAllAttributes(dashboardService.getStats());
         model.addAttribute("agentWorkload", dashboardService.getAgentWorkload());
         model.addAttribute("recentTickets", dashboardService.getRecentTickets());
+        model.addAttribute("orphanedTickets", dashboardService.getOrphanedTickets());
+        model.addAttribute("unassignedTickets", dashboardService.getUnassignedTickets());
         return "dashboard";
     }
 }
