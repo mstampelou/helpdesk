@@ -8,7 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Controller
 @RequiredArgsConstructor
@@ -35,7 +35,7 @@ public class HomeController {
                         org.springframework.data.domain.PageRequest.of(0, 200)).stream()
                 .filter(t -> t.getStatus() == TicketStatus.RESOLVED
                         && t.getUpdatedAt() != null
-                        && t.getUpdatedAt().isAfter(LocalDateTime.of(LocalDate.now(), java.time.LocalTime.MIN)))
+                        && t.getUpdatedAt().isAfter(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()))
                 .count();
         model.addAttribute("resolvedTodayCount", resolvedToday);
         return "home";

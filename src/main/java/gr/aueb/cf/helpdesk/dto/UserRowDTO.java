@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Getter
 @Setter
@@ -19,5 +19,5 @@ public class UserRowDTO {
     private Role role;
     private boolean active;
     private long ticketCount;
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 }

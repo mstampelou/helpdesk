@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 @Getter
@@ -21,5 +21,5 @@ public class TicketReadOnlyDTO {
     private TicketPriority priority;
     private String assignedToName;
     private List<String> tags;
-    private LocalDateTime updatedAt;
+    private Instant updatedAt;
 }

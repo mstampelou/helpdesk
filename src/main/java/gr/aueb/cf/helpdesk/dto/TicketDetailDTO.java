@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 @Getter
@@ -22,8 +22,8 @@ public class TicketDetailDTO {
     private TicketPriority priority;
     private String categoryName;
     private String assignedToName;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private Instant createdAt;
+    private Instant updatedAt;
     private List<String> tags;
     private List<CommentReadOnlyDTO> comments;
 }
