@@ -39,6 +39,22 @@
     margin-top: 4px;
 }
 
+.tags-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 18px;
+    margin-top: 4px;
+}
+
+.tag-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: normal;
+    white-space: nowrap;
+    margin: 0;
+}
+
 .outer-content .error {
     color: var(--red, #f87171);
     font-size: 11px;
