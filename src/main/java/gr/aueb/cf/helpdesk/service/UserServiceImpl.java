@@ -41,10 +41,6 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toList());
     }
 
-    // These two are ADMIN-only at the route level already (SecurityConfig:
-    // /admin/** -> hasRole('ADMIN')), but @PreAuthorize here is the
-    // Week-3 method-level layer: it protects the service even if it were
-    // ever called from somewhere else that isn't behind that route guard.
     @PreAuthorize("hasRole('ADMIN')")
     @Override
     @Transactional
@@ -66,7 +62,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public List<gr.aueb.cf.helpdesk.dto.UserOptionDTO> findAgents() {
-        return userRepository.findByRoleInAndDeletedFalse(List.of(Role.SUPPORT)).stream()
+        return userRepository.findByRoleInAndDeletedFalseAndActiveTrue(List.of(Role.SUPPORT)).stream()
                 .map(u -> new gr.aueb.cf.helpdesk.dto.UserOptionDTO(u.getUuid(), u.getFullName()))
                 .collect(Collectors.toList());
     }

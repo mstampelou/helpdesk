@@ -10,6 +10,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,9 +29,18 @@ public interface TicketRepository extends JpaRepository<Ticket, Long>, JpaSpecif
     long countByDeletedFalseAndAssignedToAndStatusIn(User assignedTo, List<TicketStatus> statuses);
     long countByDeletedFalseAndCreatedBy(User createdBy);
 
-    // Orphaned tickets: active (OPEN/IN_PROGRESS), still assigned to someone,
-    // but that someone is no longer a SUPPORT agent (e.g. demoted to USER).
-    List<Ticket> findByDeletedFalseAndStatusInAndAssignedTo_RoleNot(List<TicketStatus> statuses, Role role);
+//    // Orphaned tickets: active (OPEN/IN_PROGRESS), still assigned to someone,
+//    // but that someone is no longer a SUPPORT agent (e.g. demoted to USER).
+@Query("""
+    SELECT t FROM Ticket t
+    WHERE t.deleted = false
+      AND t.status IN :statuses
+      AND t.assignedTo IS NOT NULL
+      AND (t.assignedTo.role <> :supportRole
+           OR t.assignedTo.active = false)
+    """)
+List<Ticket> findOrphanedTickets(@Param("statuses") List<TicketStatus> statuses,
+                                 @Param("supportRole") Role supportRole);
 
     List<Ticket> findByDeletedFalseAndStatusInAndAssignedToIsNull(List<TicketStatus> statuses);
 }

@@ -53,7 +53,7 @@ public class DashboardServiceImpl implements DashboardService {
     @Override
     @Transactional(readOnly = true)
     public List<AgentWorkloadDTO> getAgentWorkload() {
-        List<User> agents = userRepository.findByRoleInAndDeletedFalse(List.of(Role.SUPPORT));
+        List<User> agents = userRepository.findByRoleInAndDeletedFalseAndActiveTrue(List.of(Role.SUPPORT));
         List<TicketStatus> activeStatuses = List.of(TicketStatus.OPEN, TicketStatus.IN_PROGRESS);
 
         return agents.stream()
@@ -77,7 +77,7 @@ public class DashboardServiceImpl implements DashboardService {
     @Transactional(readOnly = true)
     public List<TicketReadOnlyDTO> getOrphanedTickets() {
         List<TicketStatus> activeStatuses = List.of(TicketStatus.OPEN, TicketStatus.IN_PROGRESS);
-        return ticketRepository.findByDeletedFalseAndStatusInAndAssignedTo_RoleNot(activeStatuses, Role.SUPPORT)
+        return ticketRepository.findOrphanedTickets(activeStatuses, Role.SUPPORT)
                 .stream()
                 .map(this::toReadOnlyDTO)
                 .collect(Collectors.toList());
