@@ -1,11 +1,18 @@
 package gr.aueb.cf.helpdesk.service;
 
+import gr.aueb.cf.helpdesk.dto.TicketDetailDTO;
 import gr.aueb.cf.helpdesk.dto.TicketInsertDTO;
 import gr.aueb.cf.helpdesk.dto.TicketReadOnlyDTO;
 import gr.aueb.cf.helpdesk.exception.CategoryNotFoundException;
 import gr.aueb.cf.helpdesk.dto.TicketUpdateDTO;
+import gr.aueb.cf.helpdesk.exception.UserNotFoundException;
 import gr.aueb.cf.helpdesk.model.enums.Role;
 import gr.aueb.cf.helpdesk.model.enums.TicketStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.AccessDeniedException;
 import gr.aueb.cf.helpdesk.model.Category;
 import gr.aueb.cf.helpdesk.model.Comment;
@@ -24,12 +31,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class TicketServiceImplTest {
@@ -243,6 +250,75 @@ class TicketServiceImplTest {
 
         assertThrows(AccessDeniedException.class,
                 () -> ticketService.updateTicket("t-uuid", dto, "nina.user"));
+    }
+
+    @Test
+    void deleteTicket_shouldSetDeletedFlagTrue() {
+        Ticket ticket = new Ticket();
+        ticket.setDeleted(false);
+
+        when(ticketRepository.findByUuidAndDeletedFalse("t-uuid")).thenReturn(Optional.of(ticket));
+
+        ticketService.deleteTicket("t-uuid");
+
+        assertTrue(ticket.isDeleted());
+        verify(ticketRepository, never()).delete(any(Ticket.class));
+        verify(ticketRepository, never()).deleteById(any());
+    }
+
+    @Test
+    void findByUuid_shouldReturnDetailDtoWithComments() {
+        Category category = new Category();
+        category.setName("Network");
+
+        Ticket ticket = new Ticket();
+        ticket.setTitle("WiFi drops");
+        ticket.setDescription("Every few minutes");
+        ticket.setStatus(TicketStatus.OPEN);
+        ticket.setPriority(TicketPriority.MEDIUM);
+        ticket.setCategory(category);
+
+        when(ticketRepository.findByUuidAndDeletedFalse("t-uuid")).thenReturn(Optional.of(ticket));
+        when(commentRepository.findByTicketAndDeletedFalseOrderByCreatedAtAsc(ticket))
+                .thenReturn(List.of());
+
+        TicketDetailDTO result = ticketService.findByUuid("t-uuid");
+
+        assertEquals("WiFi drops", result.getTitle());
+        assertEquals("Network", result.getCategoryName());
+        assertTrue(result.getComments().isEmpty());
+    }
+
+    @Test
+    void findPaginated_shouldMapResultsToReadOnlyDTO() {
+        User currentUser = new User();
+        currentUser.setUsername("admin.demo");
+        currentUser.setRole(Role.ADMIN);
+
+        Ticket ticket = new Ticket();
+        ticket.setTitle("Sample ticket");
+        ticket.setStatus(TicketStatus.OPEN);
+        ticket.setPriority(TicketPriority.MEDIUM);
+
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Ticket> page = new PageImpl<>(List.of(ticket));
+
+        when(userRepository.findByUsername("admin.demo")).thenReturn(Optional.of(currentUser));
+        when(ticketRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(page);
+
+        Page<TicketReadOnlyDTO> result = ticketService.findPaginated(null, null, null, pageable, "admin.demo");
+
+        assertEquals(1, result.getTotalElements());
+        assertEquals("Sample ticket", result.getContent().get(0).getTitle());
+    }
+
+    @Test
+    void findPaginated_shouldThrow_whenCurrentUserNotFound() {
+        Pageable pageable = PageRequest.of(0, 10);
+        when(userRepository.findByUsername("ghost")).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class,
+                () -> ticketService.findPaginated(null, null, null, pageable, "ghost"));
     }
 
 
