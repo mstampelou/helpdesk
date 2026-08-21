@@ -1,15 +1,11 @@
 package gr.aueb.cf.helpdesk.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.MappedSuperclass;
-import jakarta.persistence.PrePersist;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 
 import java.time.Instant;
@@ -18,6 +14,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @MappedSuperclass
+@EntityListeners(AuditingEntityListener.class)
 public abstract class AbstractEntity {
 
     @Id
@@ -27,12 +24,12 @@ public abstract class AbstractEntity {
     @Column(nullable = false, unique = true, updatable = false, length = 36)
     private String uuid;
 
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
+    @CreatedDate
+    @Column(name  = "created_at", nullable = false, updatable = false, columnDefinition = "DATETIME")
     private Instant createdAt;
 
-    @UpdateTimestamp
-    @Column(name = "updated_at")
+    @LastModifiedDate
+    @Column(name = "updated_at", nullable = false, columnDefinition = "DATETIME" )
     private Instant updatedAt;
 
     @Column(name = "is_deleted", nullable = false)
