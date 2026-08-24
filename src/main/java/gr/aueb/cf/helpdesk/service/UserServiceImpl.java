@@ -7,6 +7,7 @@ import gr.aueb.cf.helpdesk.model.enums.Role;
 import gr.aueb.cf.helpdesk.repository.TicketRepository;
 import gr.aueb.cf.helpdesk.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
@@ -48,6 +50,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByUuid(uuid)
                 .orElseThrow(() -> new UserNotFoundException(uuid));
         user.setRole(role); // managed entity — dirty checking saves this, no explicit save() needed
+        log.info("User {} role changed to {}", uuid, role);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -57,6 +60,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByUuid(uuid)
                 .orElseThrow(() -> new UserNotFoundException(uuid));
         user.setActive(!user.isActive());
+        log.info("User {} active status toggled to {}", uuid, user.isActive());
     }
 
     @Override
