@@ -26,4 +26,5 @@ public class TicketDetailDTO {
     private Instant updatedAt;
     private List<String> tags;
     private List<CommentReadOnlyDTO> comments;
+    private List<AttachmentReadOnlyDTO> attachments;
 }

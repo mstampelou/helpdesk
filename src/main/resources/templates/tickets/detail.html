@@ -63,6 +63,30 @@
                         </div>
                     </div>
                 </form>
+
+                <div th:if="${attachmentErrors != null and !#lists.isEmpty(attachmentErrors)}" style="margin-bottom:12px;padding:10px;background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);border-radius:4px;">
+                    <p th:each="err : ${attachmentErrors}" style="font-size:11px;color:var(--red);margin:2px 0;" th:text="'⚠ ' + ${err}"></p>
+                </div>
+
+                <p class="card-label" style="margin:20px 0 12px;">Attachments (<span th:text="${#lists.size(ticket.attachments)}">0</span>)</p>
+                <div th:each="att : ${ticket.attachments}" style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12px;"
+                     xmlns:sec="http://www.thymeleaf.org/extras/springsecurity">
+                    <i class="bi bi-paperclip"></i>
+                    <a th:href="@{/attachments/{uuid}/download(uuid=${att.uuid})}" th:text="${att.fileName}" style="color:var(--blue);">file</a>
+                    <span class="cell-faint" th:text="'(' + ${#numbers.formatDecimal(att.fileSize / 1024.0, 1, 1)} + ' KB, ' + ${att.uploadedByName} + ')'"></span>
+                    <form th:action="@{/tickets/{ticketUuid}/attachments/{attachmentUuid}/delete(ticketUuid=${ticket.uuid},attachmentUuid=${att.uuid})}"
+                          method="post" style="display:inline" sec:authorize="hasAnyRole('ADMIN','SUPPORT')"
+                          onsubmit="return confirm('Delete this attachment?');">
+                        <button type="submit" class="btn btn-subtle btn-xs" style="color:var(--red);padding:0 4px;">✕</button>
+                    </form>
+                </div>
+
+                <p th:if="${#lists.isEmpty(ticket.attachments)}" class="cell-faint" style="margin-bottom:16px;">No attachments yet.</p>
+
+                <form th:action="@{/tickets/{uuid}/attachments(uuid=${ticket.uuid})}" method="post" enctype="multipart/form-data" style="margin-bottom:20px;">
+                    <input type="file" name="file" multiple required style="font-size:12px;"/>
+                    <button type="submit" class="btn btn-ghost btn-xs">Upload</button>
+                </form>
             </div>
 
             <div class="detail-meta">

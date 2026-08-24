@@ -1,10 +1,6 @@
 package gr.aueb.cf.helpdesk.service;
 
-import gr.aueb.cf.helpdesk.dto.CommentReadOnlyDTO;
-import gr.aueb.cf.helpdesk.dto.TicketDetailDTO;
-import gr.aueb.cf.helpdesk.dto.TicketInsertDTO;
-import gr.aueb.cf.helpdesk.dto.TicketReadOnlyDTO;
-import gr.aueb.cf.helpdesk.dto.TicketUpdateDTO;
+import gr.aueb.cf.helpdesk.dto.*;
 import gr.aueb.cf.helpdesk.exception.CategoryNotFoundException;
 import gr.aueb.cf.helpdesk.exception.TicketNotFoundException;
 import gr.aueb.cf.helpdesk.exception.UserNotFoundException;
@@ -16,13 +12,10 @@ import gr.aueb.cf.helpdesk.model.User;
 import gr.aueb.cf.helpdesk.model.enums.Role;
 import gr.aueb.cf.helpdesk.model.enums.TicketPriority;
 import gr.aueb.cf.helpdesk.model.enums.TicketStatus;
-import gr.aueb.cf.helpdesk.repository.CategoryRepository;
-import gr.aueb.cf.helpdesk.repository.CommentRepository;
-import gr.aueb.cf.helpdesk.repository.TagRepository;
-import gr.aueb.cf.helpdesk.repository.TicketRepository;
-import gr.aueb.cf.helpdesk.repository.UserRepository;
+import gr.aueb.cf.helpdesk.repository.*;
 import gr.aueb.cf.helpdesk.specification.TicketSpecifications;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -38,6 +31,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TicketServiceImpl implements TicketService {
 
     private final TicketRepository ticketRepository;
@@ -45,6 +39,7 @@ public class TicketServiceImpl implements TicketService {
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
     private final TagRepository tagRepository;
+    private final AttachmentRepository attachmentRepository;
 
     @Override
     @Transactional
@@ -63,6 +58,7 @@ public class TicketServiceImpl implements TicketService {
         ticket.setTags(resolveTags(dto.getTagIds()));
 
         Ticket saved = ticketRepository.save(ticket);
+        log.info("Ticket created: uuid={}, title='{}', createdBy={}", saved.getUuid(), saved.getTitle(), currentUsername);
         return toReadOnlyDTO(saved);
     }
 
@@ -100,6 +96,13 @@ public class TicketServiceImpl implements TicketService {
                         c.getBody()))
                 .collect(Collectors.toList());
 
+        List<AttachmentReadOnlyDTO> attachments = attachmentRepository
+                .findByTicketAndDeletedFalseOrderByCreatedAtAsc(ticket).stream()
+                .map(a -> new AttachmentReadOnlyDTO(
+                        a.getUuid(), a.getFileName(), a.getContentType(),
+                        a.getFileSize(), a.getUploadedBy().getFullName(), a.getCreatedAt()))
+                .collect(Collectors.toList());
+
         return new TicketDetailDTO(
                 ticket.getUuid(),
                 ticket.getTitle(),
@@ -111,7 +114,8 @@ public class TicketServiceImpl implements TicketService {
                 ticket.getCreatedAt(),
                 ticket.getUpdatedAt(),
                 ticket.getTags().stream().map(Tag::getName).collect(Collectors.toList()),
-                comments
+                comments,
+                attachments
         );
     }
 
@@ -196,6 +200,7 @@ public class TicketServiceImpl implements TicketService {
     public void deleteTicket(String uuid) {
         Ticket ticket = getTicketOrThrow(uuid);
         ticket.setDeleted(true); // soft delete — never a real DB delete
+        log.info("Ticket soft-deleted: uuid={}", uuid);
     }
 
 //    @PreAuthorize("hasAnyRole('ADMIN','SUPPORT')")
@@ -234,6 +239,8 @@ public class TicketServiceImpl implements TicketService {
                 ? "Reassigned to " + agent.getFullName() + ": " + reason.trim()
                 : "Assigned to " + agent.getFullName() + (reason != null && !reason.isBlank() ? ": " + reason.trim() : ""));
         commentRepository.save(note);
+        log.info("Ticket {} assigned to '{}' by '{}'{}", uuid, agent.getUsername(), currentUsername,
+                wasAlreadyAssigned ? " (reassignment)" : "");
     }
 
     private Ticket getTicketOrThrow(String uuid) {
