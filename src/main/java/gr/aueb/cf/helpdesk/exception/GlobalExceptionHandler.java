@@ -9,7 +9,7 @@ import org.springframework.web.servlet.ModelAndView;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler({TicketNotFoundException.class, CategoryNotFoundException.class, UserNotFoundException.class})
+    @ExceptionHandler({TicketNotFoundException.class, CategoryNotFoundException.class, UserNotFoundException.class, AttachmentNotFoundException.class})
     public ModelAndView handleNotFound(RuntimeException ex) {
         ModelAndView mav = new ModelAndView("error/404");
         mav.addObject("message", ex.getMessage());
