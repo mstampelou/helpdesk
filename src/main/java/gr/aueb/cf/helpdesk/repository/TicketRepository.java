@@ -25,12 +25,13 @@ public interface TicketRepository extends JpaRepository<Ticket, Long>, JpaSpecif
     Optional<Ticket> findByUuidAndDeletedFalse(String uuid);
 
     long countByDeletedFalseAndStatus(TicketStatus status);
+    long countByDeletedFalseAndStatusAndCreatedBy(TicketStatus status, User createdBy);
     long countByDeletedFalseAndPriority(TicketPriority priority);
     long countByDeletedFalseAndAssignedToAndStatusIn(User assignedTo, List<TicketStatus> statuses);
     long countByDeletedFalseAndCreatedBy(User createdBy);
 
-//    // Orphaned tickets: active (OPEN/IN_PROGRESS), still assigned to someone,
-//    // but that someone is no longer a SUPPORT agent (e.g. demoted to USER).
+//     Orphaned tickets: active (OPEN/IN_PROGRESS), still assigned to someone,
+//     but that someone is no longer a SUPPORT agent
 @Query("""
     SELECT t FROM Ticket t
     WHERE t.deleted = false
