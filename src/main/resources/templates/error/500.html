@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: head('Server error')}"></head>
+<body>
+<div class="login-screen">
+    <div class="login-box" style="text-align:center;">
+        <div class="login-logo">
+            <div class="mark"><i class="bi bi-exclamation-octagon"></i></div>
+            <h1>500 — Something went wrong</h1>
+            <p>An unexpected error occurred. It's been logged — please try again, or go back.</p>
+        </div>
+        <a th:href="@{/tickets}" class="login-submit" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;max-width:200px;margin:0 auto;">Back to tickets</a>
+    </div>
+</div>
+</body>
+</html>
