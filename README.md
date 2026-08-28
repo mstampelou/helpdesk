@@ -21,6 +21,7 @@ HelpDesk brings this into one place: employees raise tickets, support staff trac
 - **Dynamic filtering & search** — filter tickets by status/priority, search by title, with pagination
 - **Tagging** — free-form labels (`hardware-repair`, `network-wifi`, `password-reset`, `access-request`, `os-update`, `onboarding`, `recurring`) independent of the structured `Category` field, for cross-cutting classification
 - **Dashboard** — live counts by status and priority, per-agent workload, recent activity
+- **Home page stats scoped by role** — a plain `USER` sees counts for their own tickets only, matching what they see in the ticket list; `ADMIN`/`SUPPORT` see company-wide counts, consistent with their broader view everywhere else in the app
 - **Admin panel** — manage users: change role, enable/disable accounts
 
 ### Security & access control
@@ -28,7 +29,7 @@ HelpDesk brings this into one place: employees raise tickets, support staff trac
 - **Authentication audit trail** — custom `AuthenticationSuccessHandler`/`AuthenticationFailureHandler` log every login attempt (username, outcome, source IP) via SLF4J
 - **Role-based access** — three roles (`ADMIN`, `SUPPORT`, `USER`), enforced both in the UI and server-side
 - **Field-level authorization** — a ticket's creator can edit its own content, but status and assignment changes are silently ignored unless the caller is staff — a deliberate alternative to method-level `@PreAuthorize` where blocking the whole action would be wrong
-- **Scoped visibility** — plain `USER` accounts only ever see their own tickets, enforced via a Specification predicate at the query level, not just hidden in the UI
+- **Scoped visibility** — plain `USER` accounts only ever see their own tickets and their own stats, enforced via a Specification predicate (list) and role-conditional queries (home page) at the query level, not just hidden in the UI
 - **UUID-based public identifiers** — internal auto-increment IDs are never exposed in URLs or views
 - **Path-traversal defense on file uploads** — uploaded filenames are stripped to their base name and prefixed with a fresh UUID before being written to disk; the resolved path is double-checked against the upload directory before every write
 - **Non-root database access** — the app connects as a dedicated MySQL user scoped to its own database, not `root`; all DB credentials are externalized via environment variables with local-dev fallbacks, never hardcoded
@@ -36,6 +37,7 @@ HelpDesk brings this into one place: employees raise tickets, support staff trac
 ### Technical foundations
 - **Layered service architecture** — Controller → Service → Repository, with DTOs decoupling the view layer from JPA entities
 - **Flyway migrations** — all schema changes are versioned; no `ddl-auto`
+- **Spring Profiles** — `application.properties` holds shared config; environment-specific settings (currently the MySQL connection) live in `application-dev.properties`, activated via `spring.profiles.active=dev`
 - **Specification API** — dynamic, composable query predicates for filtering, combined with role-based scoping
 - **N+1 avoidance** — `@EntityGraph` on hot-path queries (ticket list, ticket detail)
 - **Structured logging** — SLF4J/Logback with rolling, size-bounded file appenders separated by concern (application, errors, SQL, connection pool, embedded server), not just console output
@@ -52,7 +54,9 @@ HelpDesk brings this into one place: employees raise tickets, support staff trac
 
 **Timestamps in UTC.** All entity timestamps use `Instant` rather than `LocalDateTime`, to avoid timezone-dependent inconsistencies between the application server and the database.
 
-**Unchecked exceptions + centralized handling, by design.** Custom domain exceptions (`TicketNotFoundException`, etc.) extend `RuntimeException`, not `Exception`, and are caught in one place (`GlobalExceptionHandler`) rather than declared with `throws` and handled per-controller-method. This is a deliberate departure from a more traditional checked-exception style: it keeps method signatures clean, avoids exception types "leaking" through every layer that touches them, and matches how Spring's own exception hierarchy is designed (e.g. `DataAccessException` wraps the checked `SQLException` precisely to avoid this). The trade-off is that a not-found error currently redirects to a dedicated error page rather than re-rendering the original form with field values intact — acceptable here since the one place that matters most for that (ticket creation) already handles its own errors locally instead of relying on the global handler.
+**Unchecked exceptions + centralized handling, by design.** Custom domain exceptions (`TicketNotFoundException`, etc.) extend `RuntimeException`, not `Exception`, and are caught in one place (`GlobalExceptionHandler`) rather than declared with `throws` and handled per-controller-method. This is a deliberate departure from a more traditional checked-exception style: it keeps method signatures clean, avoids exception types "leaking" through every layer that touches them, and matches how Spring's own exception hierarchy is designed (e.g. `DataAccessException` wraps the checked `SQLException` precisely to avoid this). The trade-off is that a not-found error currently redirects to a dedicated error page rather than re-rendering the original form with field values intact — acceptable here since the one place that matters most for that (ticket creation) already handles its own errors locally instead of relying on the global handler. A final, catch-all `Exception` handler renders a generic 500 page for anything unanticipated (logging the full stack trace server-side but never exposing internals to the client); `NoResourceFoundException` — the routine "browser asked for a favicon that doesn't exist" case — is matched separately ahead of it, so it resolves quietly as a 404 instead of being logged as an unexpected error.
+
+**RESOLVED vs. CLOSED is not currently a strictly enforced workflow.** Both are treated as "the problem is handled" for reporting purposes (the dashboard's "resolved today" count includes either status), but the codebase doesn't currently restrict *who* can move a ticket from `RESOLVED` to `CLOSED` or enforce that order over jumping straight to `CLOSED`. In a real deployment, `CLOSED` would typically be a later, separate step — e.g. confirmed by the original requester, or auto-closed after a period of inactivity — while `RESOLVED` just means staff believe the fix is in place. Left unenforced here deliberately, as a known scope boundary rather than an oversight.
 
 ---
 
@@ -166,7 +170,7 @@ docker-compose up -d
 ./gradlew clean bootRun
 ```
 
-The app starts on **http://localhost:8080**. Flyway runs all migrations automatically on startup.
+The app starts on **http://localhost:8080** with the `dev` Spring profile active. Flyway runs all migrations automatically on startup.
 
 ### Demo accounts
 
@@ -204,6 +208,7 @@ Attachments are written to `./uploads` by default (configurable via `app.upload-
 - **Comments are immutable** — no edit/delete on individual comments, to keep the activity log a reliable record of what happened. Attachments *can* be soft-deleted, since removing a mistakenly-uploaded file doesn't compromise the log the way editing a comment would.
 - **No self-service registration** — accounts are provisioned via seed data / admin action, matching how internal helpdesk tools are typically set up.
 - **Unchecked exceptions over checked** — see *Architecture Notes* above.
+- **RESOLVED vs. CLOSED workflow is not enforced** — see *Architecture Notes* above.
 
 ---
 
