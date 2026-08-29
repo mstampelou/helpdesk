@@ -191,7 +191,6 @@ public class TicketServiceImpl implements TicketService {
                 ticket.setAssignedTo(null);
             }
         }
-        // managed entity — dirty checking persists this, no explicit save() needed
     }
 
     @PreAuthorize("hasAnyRole('ADMIN','SUPPORT')")
@@ -202,16 +201,6 @@ public class TicketServiceImpl implements TicketService {
         ticket.setDeleted(true); // soft delete — never a real DB delete
         log.info("Ticket soft-deleted: uuid={}", uuid);
     }
-
-//    @PreAuthorize("hasAnyRole('ADMIN','SUPPORT')")
-//    @Override
-//    @Transactional
-//    public void assignTicket(String uuid, String agentUuid) {
-//        Ticket ticket = getTicketOrThrow(uuid);
-//        User agent = userRepository.findByUuid(agentUuid)
-//                .orElseThrow(() -> new UserNotFoundException(agentUuid));
-//        ticket.setAssignedTo(agent);
-//    }
 
     @PreAuthorize("hasAnyRole('ADMIN','SUPPORT')")
     @Override
