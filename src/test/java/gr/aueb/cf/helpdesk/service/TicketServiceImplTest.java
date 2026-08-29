@@ -8,6 +8,7 @@ import gr.aueb.cf.helpdesk.dto.TicketUpdateDTO;
 import gr.aueb.cf.helpdesk.exception.UserNotFoundException;
 import gr.aueb.cf.helpdesk.model.enums.Role;
 import gr.aueb.cf.helpdesk.model.enums.TicketStatus;
+import gr.aueb.cf.helpdesk.repository.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -19,11 +20,6 @@ import gr.aueb.cf.helpdesk.model.Comment;
 import gr.aueb.cf.helpdesk.model.Ticket;
 import gr.aueb.cf.helpdesk.model.User;
 import gr.aueb.cf.helpdesk.model.enums.TicketPriority;
-import gr.aueb.cf.helpdesk.repository.CategoryRepository;
-import gr.aueb.cf.helpdesk.repository.CommentRepository;
-import gr.aueb.cf.helpdesk.repository.TagRepository;
-import gr.aueb.cf.helpdesk.repository.TicketRepository;
-import gr.aueb.cf.helpdesk.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -51,6 +47,8 @@ class TicketServiceImplTest {
     private CommentRepository commentRepository;
     @Mock
     private TagRepository tagRepository;
+    @Mock
+    private AttachmentRepository attachmentRepository;
 
     @InjectMocks
     private TicketServiceImpl ticketService;
@@ -280,6 +278,8 @@ class TicketServiceImplTest {
 
         when(ticketRepository.findByUuidAndDeletedFalse("t-uuid")).thenReturn(Optional.of(ticket));
         when(commentRepository.findByTicketAndDeletedFalseOrderByCreatedAtAsc(ticket))
+                .thenReturn(List.of());
+        when(attachmentRepository.findByTicketAndDeletedFalseOrderByCreatedAtAsc(ticket))
                 .thenReturn(List.of());
 
         TicketDetailDTO result = ticketService.findByUuid("t-uuid");
