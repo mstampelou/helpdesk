@@ -23,6 +23,7 @@ HelpDesk brings this into one place: employees raise tickets, support staff trac
 - **Dashboard** — live counts by status and priority, per-agent workload, recent activity
 - **Home page stats scoped by role** — a plain `USER` sees counts for their own tickets only, matching what they see in the ticket list; `ADMIN`/`SUPPORT` see company-wide counts, consistent with their broader view everywhere else in the app
 - **Admin panel** — manage users: change role, enable/disable accounts
+- **Read-only REST API** — `/api/**` endpoints for categories, tags, tickets, and dashboard stats, documented via Swagger/OpenAPI
 
 ### Security & access control
 - **Session-based authentication** — Spring Security, BCrypt password hashing
@@ -142,6 +143,7 @@ erDiagram
 | Security | Spring Security (session-based, BCrypt) |
 | Data persistence | Spring Data JPA / Hibernate, MySQL 8, Flyway |
 | Validation | Jakarta Bean Validation |
+| API documentation | springdoc-openapi (Swagger UI) |
 | Logging | SLF4J / Logback (rolling file appenders) |
 | Frontend | Thymeleaf (server-side rendering) |
 | Build tool | Gradle |
@@ -171,6 +173,8 @@ docker-compose up -d
 ```
 
 The app starts on **http://localhost:8080** with the `dev` Spring profile active. Flyway runs all migrations automatically on startup.
+
+Interactive API documentation (Swagger UI) is available at **http://localhost:8080/swagger-ui/index.html**.
 
 ### Demo accounts
 
@@ -214,13 +218,14 @@ Attachments are written to `./uploads` by default (configurable via `app.upload-
 
 ## Testing
 
-Unit tests (JUnit 5 + Mockito) cover the service layer, plus one repository-level integration test:
+Unit tests (JUnit 5 + Mockito) cover the service layer, plus repository- and web-layer integration tests:
 
 - **`TicketServiceImplTest`** — the most complex service: ticket creation and its validation path, field-level authorization in `updateTicket()` (owner vs. staff vs. unrelated user), `assignTicket()`'s conditional reassignment-reason validation (verified with `ArgumentCaptor` against the resulting comment content), soft-delete, and scoped `findPaginated()` behavior
 - **`UserServiceImplTest`** — role changes and account activation toggling
 - **`DashboardServiceImplTest`** — orphaned/unassigned ticket queries map correctly to DTOs
 - **`AttachmentServiceImplTest`** — file size and content-type validation reject invalid uploads before touching the filesystem or database; a valid upload is written to a real temp directory (`@TempDir`) and persisted correctly
 - **`TicketRepositoryTest`** (`@DataJpaTest`) — the only tier that runs against a real database (H2, MySQL-compatible mode) rather than mocks, verifying the actual JPQL behind `findOrphanedTickets` (both the demoted-role and disabled-account branches) and the unassigned-ticket query
+- **`ApiCategoryControllerTest` / `ApiTagControllerTest` / `ApiTicketControllerTest` / `ApiDashboardControllerTest`** (`@WebMvcTest`) — HTTP-layer tests for the REST API: correct JSON response shape, role-based authorization (`@PreAuthorize` on the dashboard endpoint), and unauthenticated requests correctly redirected to login, with the application's real `SecurityConfig` imported rather than a default test security setup
 
 ```bash
 ./gradlew test
