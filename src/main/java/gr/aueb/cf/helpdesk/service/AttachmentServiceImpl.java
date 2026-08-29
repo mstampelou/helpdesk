@@ -43,7 +43,7 @@ public class AttachmentServiceImpl implements AttachmentService {
             "image/png", "image/jpeg", "image/gif", "application/pdf", "text/plain"
     );
 
-    @Value("${app.upload-dir}")
+    @Value("${app.upload-dir:./uploads}")
     private String uploadDir;
 
     private final AttachmentRepository attachmentRepository;
