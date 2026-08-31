@@ -176,6 +176,10 @@ The app starts on **http://localhost:8080** with the `dev` Spring profile active
 
 Interactive API documentation (Swagger UI) is available at **http://localhost:8080/swagger-ui/index.html**.
 
+### Live demo
+
+A hosted version is available at **[helpdesk-cf9.onrender.com](https://helpdesk-cf9.onrender.com)** (Render free tier + Aiven MySQL). The free tier spins the service down after periods of inactivity, so the first request after a while may take 30–50 seconds to respond while it wakes up — subsequent requests are fast. Use the demo accounts below to log in.
+
 ### Demo accounts
 
 All demo accounts use the password `password123`.
