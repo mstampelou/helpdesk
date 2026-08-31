@@ -628,3 +628,80 @@ table.data-table {
   border-top: 1px solid var(--border-soft);
   background: var(--bg);
 }
+
+/* ---------- mobile / small screens ---------- */
+
+@media (max-width: 768px) {
+  .app-shell {
+    flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+  }
+
+  /* sidebar becomes a horizontal top bar instead of a fixed-width column */
+  .sidebar {
+    width: 100%;
+    height: auto;
+    flex-direction: column;
+    border-right: none;
+    border-bottom: 1px solid var(--border-soft);
+  }
+
+  .sidebar-nav {
+    flex: none;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+    overflow-x: auto;
+    padding: 8px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .nav-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 0;
+  }
+
+  .nav-group-label { display: none; }
+
+  .nav-item {
+    width: auto;
+    white-space: nowrap;
+    padding: 6px 10px;
+  }
+
+  .sidebar-user {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid var(--border-soft);
+  }
+
+  .main { overflow: visible; }
+  .content { overflow: visible; padding: 16px; }
+
+  /* dashboard / home stat grids: stop forcing a fixed column count */
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  .home-stats { grid-template-columns: repeat(2, 1fr); }
+
+  /* forms and two-column layouts stack instead of squeezing side by side */
+  .field-row,
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  /* ticket detail: metadata panel moves below the main content instead of beside it */
+  .detail-layout {
+    flex-direction: column;
+    overflow: visible;
+  }
+  .detail-meta {
+    width: 100%;
+    border-right: none;
+    border-top: 1px solid var(--border-soft);
+  }
+}
