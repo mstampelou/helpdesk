@@ -36,8 +36,8 @@ public class AdminUserController {
     }
 
     @PostMapping("/{uuid}/toggle-active")
-    public String toggleActive(@PathVariable String uuid) {
-        userService.toggleActive(uuid);
+    public String toggleActive(@PathVariable String uuid, java.security.Principal principal) {
+        userService.toggleActive(uuid, principal.getName());
         return "redirect:/admin/users";
     }
 }

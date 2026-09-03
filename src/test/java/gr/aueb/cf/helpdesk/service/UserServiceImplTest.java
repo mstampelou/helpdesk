@@ -47,15 +47,30 @@ class UserServiceImplTest {
                 () -> userService.changeRole("missing-uuid", Role.SUPPORT));
     }
 
+@Test
+void toggleActive_shouldFlipActiveFlag() {
+    User user = new User();
+    user.setUsername("target.user");
+    user.setActive(true);
+
+    when(userRepository.findByUuid("u-uuid")).thenReturn(Optional.of(user));
+
+    userService.toggleActive("u-uuid", "admin.demo");
+
+    assertFalse(user.isActive());
+}
+
     @Test
-    void toggleActive_shouldFlipActiveFlag() {
+    void toggleActive_shouldThrow_whenAdminTargetsOwnAccount() {
         User user = new User();
+        user.setUsername("admin.demo");
         user.setActive(true);
 
         when(userRepository.findByUuid("u-uuid")).thenReturn(Optional.of(user));
 
-        userService.toggleActive("u-uuid");
+        assertThrows(IllegalArgumentException.class,
+                () -> userService.toggleActive("u-uuid", "admin.demo"));
 
-        assertFalse(user.isActive());
+        assertTrue(user.isActive()); // untouched — the flag must not flip
     }
 }

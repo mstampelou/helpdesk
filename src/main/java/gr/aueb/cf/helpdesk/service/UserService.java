@@ -9,6 +9,6 @@ import java.util.List;
 public interface UserService {
     List<UserRowDTO> findAll(String search);
     void changeRole(String uuid, Role role);
-    void toggleActive(String uuid);
+    void toggleActive(String uuid, String currentUsername);
     List<UserOptionDTO> findAgents();
 }

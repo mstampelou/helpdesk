@@ -56,9 +56,12 @@ public class UserServiceImpl implements UserService {
     @PreAuthorize("hasRole('ADMIN')")
     @Override
     @Transactional
-    public void toggleActive(String uuid) {
+    public void toggleActive(String uuid, String currentUsername) {
         User user = userRepository.findByUuid(uuid)
                 .orElseThrow(() -> new UserNotFoundException(uuid));
+        if (user.getUsername().equals(currentUsername)) {
+            throw new IllegalArgumentException("You cannot disable your own account.");
+        }
         user.setActive(!user.isActive());
         log.info("User {} active status toggled to {}", uuid, user.isActive());
     }
