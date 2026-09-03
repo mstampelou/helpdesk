@@ -190,6 +190,29 @@ Interactive API documentation (Swagger UI) is available at **http://localhost:80
 
 A hosted version is available at **[helpdesk-cf9.onrender.com](https://helpdesk-cf9.onrender.com)** (Render free tier + Aiven MySQL). The free tier spins the service down after periods of inactivity, so the first request after a while may take 2-4 minutes to respond while it wakes up — subsequent requests are fast. Use the demo accounts below to log in.
 
+### Build & Deployment
+
+The app runs as a two-stage Docker build (`Dockerfile`): the first stage builds the JAR with the Gradle wrapper (`./gradlew bootJar --no-daemon -x test`), the second copies only the resulting JAR into a minimal `eclipse-temurin:21-jre` runtime image. This keeps the final image small and avoids shipping the JDK/Gradle toolchain to production.
+
+**Locally**, the same image can be built and run with:
+
+```bash
+docker build -t helpdesk .
+docker run -p 8080:8080 --env-file .env.prod helpdesk
+```
+
+**In production** (currently hosted on [Render](https://render.com)), the platform builds directly from this `Dockerfile` on every push to `main` and runs the resulting container. The `prod` Spring profile (`application-prod.properties`) is activated via the `SPRING_PROFILES_ACTIVE=prod` environment variable, and reads all database configuration from environment variables rather than hardcoded values:
+
+| Variable | Purpose |
+|---|---|
+| `SPRING_PROFILES_ACTIVE` | Set to `prod` to activate `application-prod.properties` |
+| `DB_URL` | Full JDBC URL, e.g. `jdbc:mysql://<host>:<port>/<db>?ssl-mode=REQUIRED` |
+| `DB_USERNAME` | Database user (a dedicated, least-privilege user — not root) |
+| `DB_PASSWORD` | Database password |
+| `UPLOAD_DIR` | *(optional)* Attachment storage path; defaults to `./uploads` |
+
+These are configured as environment variables directly in the Render dashboard (Settings → Environment) and are never committed to the repository. The database itself is a managed MySQL instance on [Aiven](https://aiven.io), reached over a TLS connection (`ssl-mode=REQUIRED`). Flyway runs all pending migrations automatically against it on every startup, the same way it does locally.
+
 ### Demo accounts
 
 All demo accounts use the password `password123`.
