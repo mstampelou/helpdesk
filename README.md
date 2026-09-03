@@ -12,6 +12,16 @@ HelpDesk brings this into one place: employees raise tickets, support staff trac
 
 ---
 
+## Demo
+
+> This demo shows the day-to-day support workflow: browsing and filtering tickets, opening one to review its history, reassigning it to another agent, and attaching a file — all as an ADMIN account would see it.
+
+<p align="center">
+  <img src="helpdesk_demo.gif" alt="HelpDesk demo — browsing tickets, creating one, reassigning, and attaching a file" width="800">
+</p>
+
+---
+
 ## Key Features
 
 ### Product capabilities
