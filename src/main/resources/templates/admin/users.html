@@ -46,7 +46,7 @@
                         <td class="cell-faint" th:text="${u.email}">email</td>
                         <td>
                             <form th:action="@{/admin/users/{uuid}/role(uuid=${u.uuid})}" method="post">
-                                <select class="select" name="role" onchange="this.form.submit()" style="background:transparent;border:none;padding:2px;">
+                                <select class="select" name="role" onchange="this.form.submit()" style="border:none;padding:2px 6px;">
                                     <option value="ADMIN"   th:selected="${u.role.name() == 'ADMIN'}">admin</option>
                                     <option value="SUPPORT" th:selected="${u.role.name() == 'SUPPORT'}">support</option>
                                     <option value="USER"    th:selected="${u.role.name() == 'USER'}">user</option>
