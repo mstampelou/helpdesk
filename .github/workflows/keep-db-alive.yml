@@ -2,15 +2,35 @@ name: Keep Aiven DB Alive
 
 on:
   schedule:
-    - cron: '0 4 * * *'
+        - cron: '0 */6 * * *'
   workflow_dispatch:
+    inputs:
+      reset_data:
+        description: 'Reset demo data to original seed state?'
+        type: boolean
+        default: false
 
 jobs:
-  ping-db:
+  keep-alive:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
       - name: Install MySQL client
         run: sudo apt-get update && sudo apt-get install -y mysql-client
+
+      - name: Reset demo data (manual only)
+        if: github.event_name == 'workflow_dispatch' && inputs.reset_data == true
+        env:
+          DB_HOST: ${{ secrets.AIVEN_DB_HOST }}
+          DB_PORT: ${{ secrets.AIVEN_DB_PORT }}
+          DB_USER: ${{ secrets.AIVEN_DB_USER }}
+          DB_PASSWORD: ${{ secrets.AIVEN_DB_PASSWORD }}
+        run: |
+          mysql --host="$DB_HOST" --port="$DB_PORT" --user="$DB_USER" \
+                --password="$DB_PASSWORD" --ssl-mode=REQUIRED \
+                defaultdb < scripts/reset-seed.sql
 
       - name: Ping database
         env:
