@@ -188,7 +188,7 @@ Interactive API documentation (Swagger UI) is available at **http://localhost:80
 
 ### Live demo
 
-A hosted version is available at **[helpdesk-cf9.onrender.com](https://helpdesk-cf9.onrender.com)** (Render free tier + Aiven MySQL). The free tier spins the service down after periods of inactivity, so the first request after a while may take 2-4 minutes to respond while it wakes up — subsequent requests are fast. Use the demo accounts below to log in.
+A hosted version is available at **[helpdesk-cf9.onrender.com](https://helpdesk-cf9.onrender.com)** (Render free tier + Aiven MySQL), kept warm via an external uptime monitor so it should respond immediately. Use the demo accounts below to log in.
 
 ### Build & Deployment
 
